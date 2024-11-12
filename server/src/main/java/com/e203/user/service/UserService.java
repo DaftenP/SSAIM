@@ -1,6 +1,6 @@
 package com.e203.user.service;
 
-import com.e203.global.utils.ImageUploader;
+import com.e203.global.utils.FileUploader;
 import com.e203.user.entity.User;
 import com.e203.user.repository.UserRepository;
 import com.e203.user.request.UserEditInfoDto;
@@ -27,7 +27,7 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
-    private final ImageUploader imageUploader;
+    private final FileUploader fileUploader;
 
     public boolean createUser(UserSignUpRequestDto userSignupRequestDto, MultipartFile profileImage) {
         if (userRepository.existsByUserEmail(userSignupRequestDto.getUserEmail())) {
@@ -88,7 +88,7 @@ public class UserService {
 
     private String uploadProfileImage(MultipartFile profileImage) {
         return Optional.ofNullable(profileImage)
-                .map(imageUploader::upload)
+                .map(fileUploader::upload)
                 .orElse(null);
     }
 

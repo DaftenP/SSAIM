@@ -4,21 +4,28 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
 import com.e203.project.dto.gitlabapi.GitlabMR;
+import com.e203.project.dto.gitlabapi.GitlabWebhook;
 import com.e203.project.dto.request.ProjectGitlabConnectDto;
+import com.e203.project.dto.response.ProjectGitlabMRResponseDto;
 import com.e203.project.entity.Project;
 import com.e203.project.entity.ProjectMember;
 import com.e203.project.repository.ProjectMemberRepository;
 import com.e203.project.repository.ProjectRepository;
+import com.e203.user.entity.User;
+import com.e203.user.repository.UserRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +41,7 @@ public class GitlabService {
 	private final ProjectRepository projectRepository;
 	private final ProjectMemberRepository projectMemberRepository;
 	private final RestClient restClient;
-	private final ObjectMapper objectMapper;
+	private final UserRepository userRepository;
 
 	@Transactional
 	public boolean setGitlabApi(ProjectGitlabConnectDto gitlabDto, int projectId) {
@@ -46,10 +53,14 @@ public class GitlabService {
 		project.setGitlabApi(gitlabDto.getGitlabApi());
 		project.setGitlabProjectId(gitlabDto.getGitlabProjectId());
 
+		connectWebhook(gitlabDto.getGitlabProjectId() ,gitlabDto.getGitlabApi());
+
 		return true;
 	}
 
-	public List<String> findUserMR(String startDate, String endDate, Integer projectId, int userId) {
+
+	public List<ProjectGitlabMRResponseDto> findUserMR(String startDate, String endDate, Integer projectId,
+		int userId) {
 		if (!isExist(projectId)) {
 			return null;
 		}
@@ -60,7 +71,8 @@ public class GitlabService {
 
 		String gitlabApiKey = leader.getProject().getGitlabApi();
 		String gitlabProjectId = leader.getProject().getGitlabProjectId();
-		String userEmail = leader.getUser().getUserEmail();
+		User user = userRepository.findByUserId(userId);
+		String userEmail = user.getUserEmail();
 
 		StringTokenizer st = new StringTokenizer(userEmail, "@");
 		String username = st.nextToken();
@@ -70,14 +82,29 @@ public class GitlabService {
 			return null;
 		}
 
-		ArrayList<String> allMrList = new ArrayList<>();
+		ArrayList<ProjectGitlabMRResponseDto> allMrList = new ArrayList<>();
 
 		allMR.stream()
-			.filter(mr -> mr.getAssignee() != null)
-			.filter(mr -> isSameUser(mr.getAssignee().getUsername(), username))
-			.forEach(mr -> allMrList.add(mr.getTitle()));
+			.filter(mr -> mr.getMergedBy().getUsername() != null)
+			.filter(mr -> isSameUser(mr.getMergedBy().getUsername(), username))
+			.forEach(mr -> allMrList.add(
+				ProjectGitlabMRResponseDto.builder().title(mr.getTitle()).mergeDate(mr.getMergedAt()).build()));
 
 		return allMrList;
+	}
+
+	public boolean connectWebhook(String gitlabProjectId, String gitlabApiKey){
+		String uri = "https://lab.ssafy.com/api/v4/projects/"+gitlabProjectId+"/hooks";
+
+		ResponseEntity<Map> response = restClient.post()
+			.uri(uri)
+			.contentType(MediaType.APPLICATION_JSON)
+			.header("PRIVATE-TOKEN",gitlabApiKey)
+			.body(GitlabWebhook.create())
+			.retrieve()
+			.toEntity(Map.class);
+
+		return response.getStatusCode().is2xxSuccessful();
 	}
 
 	public List<GitlabMR> getAllMR(String startDate, String endDate, String gitlabProjectId, String gitlabApiToken) {
@@ -85,10 +112,9 @@ public class GitlabService {
 		int page = 1;
 		ArrayList<GitlabMR> mrList = new ArrayList<>();
 		while (page < MAXPAGE) {
-			String url =
-				"https://lab.ssafy.com/api/v4/projects/" + gitlabProjectId + "/merge_requests" +
-					"?state=merged&merged_before=" + startDate +
-				"&merged_after="+ endDate +"&per_page=100&page=" + page ;
+			String url = "https://lab.ssafy.com/api/v4/projects/" + gitlabProjectId + "/merge_requests"
+				+ "?state=merged&merged_before=" + startDate + "&merged_after=" + endDate + "&per_page=100&page="
+				+ page;
 
 			try {
 				String responseBody = restClient.get()

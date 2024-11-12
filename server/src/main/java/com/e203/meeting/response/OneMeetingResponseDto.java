@@ -9,24 +9,26 @@ import java.time.LocalDateTime;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class MeetingResponseDto {
+public class OneMeetingResponseDto {
 
     private Integer meetingId;
     private Integer projectId;
     private String meetingTitle;
-    private String meetingFirstVoiceText;
+    private String meetingVoiceUrl;
+    private SttResponseDto sttResponseDto;
     private LocalDateTime meetingCreateTime;
     private Integer meetingVoiceTime;
 
     @Builder
-    private MeetingResponseDto(Integer meetingId, Integer projectId, String meetingTitle
-            , String meetingFirstVoiceText, LocalDateTime meetingCreateTime
+    private OneMeetingResponseDto(Integer meetingId, Integer projectId, String meetingTitle
+            , String meetingVoiceUrl, LocalDateTime meetingCreateTime, SttResponseDto sttResponseDto
             , Integer meetingVoiceTime) {
 
         this.meetingId = meetingId;
         this.projectId = projectId;
         this.meetingTitle = meetingTitle;
-        this.meetingFirstVoiceText = meetingFirstVoiceText;
+        this.meetingVoiceUrl = meetingVoiceUrl;
+        this.sttResponseDto = sttResponseDto;
         this.meetingCreateTime = meetingCreateTime;
         this.meetingVoiceTime = meetingVoiceTime;
     }

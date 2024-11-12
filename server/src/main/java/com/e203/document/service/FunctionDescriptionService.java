@@ -1,7 +1,11 @@
 package com.e203.document.service;
 
 import java.util.List;
+import java.util.Optional;
 
+import com.e203.global.utils.ChatAiService;
+import com.e203.project.entity.Project;
+import com.e203.project.repository.ProjectRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.index.Index;
@@ -22,43 +26,36 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class FunctionDescriptionService {
-	private final MongoTemplate mongoTemplate;
-	private final FunctionDescriptionRepository functionDescriptionRepository;
 
-	public void createIndex() {
-		// Collation 설정
-		Collation collation = Collation.of("ko");
+    private final MongoTemplate mongoTemplate;
 
-		// 인덱스 정의
-		IndexDefinition indexDefinition = new Index()
-			.on("createdAt", Sort.Direction.DESC)
-			.collation(collation);
+    private final FunctionDescriptionRepository functionDescriptionRepository;
 
-		// 인덱스 추가
-		IndexOperations indexOps = mongoTemplate.indexOps(FunctionDescription.class);
-		indexOps.ensureIndex(indexDefinition);
-	}
+    private final ProjectRepository projectRepository;
 
-	public FunctionDescription getFuncDesc(String projectId) {
-		List<FunctionDescription> results = functionDescriptionRepository.findTopByProjectIdOrderByCreatedAtDesc(
-			projectId, Sort.by(Sort.Direction.DESC, "createdAt"));
-		return results.isEmpty() ? null : results.get(0); // 결과가 없으면 null 반환
-	}
+    private final ChatAiService chatAiService;
 
-	public String getFuncDescContent(String projectId){
-		FunctionDescription funcDesc = getFuncDesc(projectId);
-		return funcDesc.getContent();
-	}
+    private final ProposalService proposalService;
 
-	public FunctionDescription updateFuncDescContent(String projectId, String content) {
-		Query query = new Query(Criteria.where("projectId").is(projectId));
+    public void createIndex() {
+        // Collation 설정
+        Collation collation = Collation.of("ko");
 
-		Update update = new Update().set("content", content);
+        // 인덱스 정의
+        IndexDefinition indexDefinition = new Index()
+                .on("createdAt", Sort.Direction.DESC)
+                .collation(collation);
 
-		UpdateResult documents = mongoTemplate.updateFirst(query, update, "FunctionDescription");
+        // 인덱스 추가
+        IndexOperations indexOps = mongoTemplate.indexOps(FunctionDescription.class);
+        indexOps.ensureIndex(indexDefinition);
+    }
 
-		return getFuncDesc(projectId);
-	}
+    public FunctionDescription getFuncDesc(String projectId) {
+        List<FunctionDescription> results = functionDescriptionRepository.findTopByProjectIdOrderByCreatedAtDesc(
+                projectId, Sort.by(Sort.Direction.DESC, "createdAt"));
+        return results.isEmpty() ? null : results.get(0); // 결과가 없으면 null 반환
+    }
 
 	public FunctionDescription saveFuncDesc(String projectId) {
 		String defaultForm = "{\"domain\": [],\"featureName\": [],\"description\": [],\"owner\": [],\"priority\": []}";

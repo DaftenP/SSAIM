@@ -11,7 +11,7 @@ import java.io.IOException;
 
 @Component
 @RequiredArgsConstructor
-public class ImageUploaderImpl implements ImageUploader {
+public class FileUploaderImpl implements FileUploader {
 
     private final AmazonS3 s3Client;
 

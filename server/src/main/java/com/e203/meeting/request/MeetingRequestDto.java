@@ -11,13 +11,11 @@ import lombok.NoArgsConstructor;
 public class MeetingRequestDto {
 
     private String meetingTitle;
-    private String meetingVoiceUrl;
     private Integer projectId;
 
     @Builder
-    private MeetingRequestDto(String meetingTitle, String meetingVoiceUrl, Integer projectId) {
+    private MeetingRequestDto(String meetingTitle, Integer projectId) {
         this.meetingTitle = meetingTitle;
-        this.meetingVoiceUrl = meetingVoiceUrl;
         this.projectId = projectId;
     }
 }

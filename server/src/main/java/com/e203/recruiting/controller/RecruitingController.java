@@ -1,5 +1,6 @@
 package com.e203.recruiting.controller;
 
+import com.e203.global.response.PaginationResponseDto;
 import com.e203.jwt.JWTUtil;
 import com.e203.recruiting.request.RecruitingApplicantEditRequestDto;
 import com.e203.recruiting.request.RecruitingApplyRequestDto;
@@ -48,15 +49,17 @@ public class RecruitingController {
     }
 
     @GetMapping("/api/v1/recruiting/posts")
-    public ResponseEntity<List<RecruitingPostResponseDto>> searchPosts(
+    public ResponseEntity<PaginationResponseDto<RecruitingPostResponseDto>> searchPosts(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) Integer position,
             @RequestParam(required = false) Integer campus,
             @RequestParam(required = false) Integer domain,
             @RequestParam(required = false) Integer status,
-            @RequestParam(defaultValue = "1") Integer page) {
+            @RequestParam(defaultValue = "5") Integer size,
+            @RequestParam(defaultValue = "1") Integer pageNum) {
 
-        return ResponseEntity.status(200).body(recruitingService.searchPosts(title, position, campus, domain, status, page));
+        return ResponseEntity.status(200).body(
+                recruitingService.searchPosts(title, position, campus, domain, status, size, pageNum));
     }
 
     @PatchMapping("/api/v1/recruiting/posts/{postId}")

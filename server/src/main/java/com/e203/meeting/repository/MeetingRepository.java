@@ -9,5 +9,5 @@ import java.util.List;
 
 public interface MeetingRepository extends JpaRepository<Meeting, Integer> {
 
-    List<Meeting> findByprojectId(Project projectId);
+    List<Meeting> findByproject(Project project);
 }

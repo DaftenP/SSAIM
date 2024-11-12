@@ -2,12 +2,11 @@ package com.e203.weeklyremind.service;
 
 import com.e203.dailyremind.entity.DailyRemind;
 import com.e203.dailyremind.repository.DailyRemindRepository;
+import com.e203.global.utils.ChatAiService;
 import com.e203.project.entity.Project;
 import com.e203.project.entity.ProjectMember;
 import com.e203.project.repository.ProjectMemberRepository;
 import com.e203.project.repository.ProjectRepository;
-import com.e203.user.entity.User;
-import com.e203.user.repository.UserRepository;
 import com.e203.weeklyremind.entity.WeeklyRemind;
 import com.e203.weeklyremind.repository.WeeklyRemindRepository;
 import com.e203.weeklyremind.request.WeeklyRemindRequestDto;

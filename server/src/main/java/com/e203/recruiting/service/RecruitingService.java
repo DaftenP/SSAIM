@@ -1,6 +1,7 @@
 package com.e203.recruiting.service;
 
 import com.e203.global.entity.ProjectDomain;
+import com.e203.global.response.PaginationResponseDto;
 import com.e203.recruiting.entity.BoardRecruiting;
 import com.e203.recruiting.entity.RecruitingMember;
 import com.e203.recruiting.repository.RecruitingMemberRepository;
@@ -9,6 +10,7 @@ import com.e203.recruiting.request.*;
 import com.e203.recruiting.response.*;
 import com.e203.user.entity.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -121,13 +123,22 @@ public class RecruitingService {
     }
 
 
-    public List<RecruitingPostResponseDto> searchPosts(String title, Integer position, Integer campus,
-                                                       Integer domain, Integer status, Integer page) {
+    public PaginationResponseDto<RecruitingPostResponseDto> searchPosts(String title, Integer position, Integer campus,
+                                                                        Integer domain, Integer status, Integer size,
+                                                                        Integer pageNum) {
 
-        Pageable pageable = PageRequest.of(page - 1, 5);
-        return recruitingRepository.searchPosts(title, position, campus, domain, status, pageable).stream()
-                .map(RecruitingPostResponseDto::fromEntity)
-                .collect(Collectors.toList());
+        Pageable pageable = PageRequest.of(pageNum - 1, size);
+        Page<BoardRecruiting> recruiting = recruitingRepository.searchPosts(title, position, campus, domain, status, pageable);
+
+        return PaginationResponseDto.<RecruitingPostResponseDto>builder()
+                .totalPages(recruiting.getTotalPages())
+                .currentPage(recruiting.getNumber() + 1)
+                .pageSize(size)
+                .totalCount(recruiting.getTotalElements())
+                .data(recruiting.stream()
+                        .map(RecruitingPostResponseDto::fromEntity)
+                        .collect(Collectors.toList()))
+                .build();
     }
 
     @Transactional

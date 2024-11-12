@@ -2,8 +2,10 @@ package com.e203.meeting.controller;
 
 import com.e203.meeting.request.FixSpeakerNameRequestDto;
 import com.e203.meeting.request.MeetingRequestDto;
+import com.e203.meeting.response.MeetingIdResponseDto;
 import com.e203.meeting.response.MeetingResponseDto;
 import com.e203.meeting.response.MeetingSummaryResponseDto;
+import com.e203.meeting.response.OneMeetingResponseDto;
 import com.e203.meeting.service.MeetingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -33,9 +35,9 @@ public class MeetingController {
     }
 
     @GetMapping("/api/v1/projects/{projectId}/meetings/{meetingId}")
-    public ResponseEntity<MeetingResponseDto> getMeeting(@PathVariable("meetingId") int meetingId) throws Exception {
+    public ResponseEntity<OneMeetingResponseDto> getMeeting(@PathVariable("meetingId") int meetingId) throws Exception {
 
-        MeetingResponseDto result = meetingService.getMeeting(meetingId);
+        OneMeetingResponseDto result = meetingService.getMeeting(meetingId);
         if (result == null) {
             return ResponseEntity.status(NOT_FOUND).body(null);
         }
@@ -45,15 +47,15 @@ public class MeetingController {
     }
 
     @PostMapping("/api/v1/projects/{projectId}/meetings")
-    public ResponseEntity<String> createMeeting(@RequestPart("audiofile") MultipartFile audiofile
+    public ResponseEntity<MeetingIdResponseDto> createMeeting(@RequestPart("audiofile") MultipartFile audiofile
                                                         , @RequestPart("meetingRequestDto") MeetingRequestDto meetingRequestDto) throws Exception {
-        Boolean result = meetingService.createMeeting(meetingRequestDto, audiofile);
+        MeetingIdResponseDto result = meetingService.createMeeting(meetingRequestDto, audiofile);
 
-        if (!result) {
-            return ResponseEntity.status(FORBIDDEN).body("회의 스크립트 생성에 실패하였습니다.");
+        if (result == null) {
+            return ResponseEntity.status(FORBIDDEN).body(result);
         }
         else {
-            return ResponseEntity.status(OK).body("회의 스크립트가 생성되었습니다.");
+            return ResponseEntity.status(OK).body(result);
         }
     }
 

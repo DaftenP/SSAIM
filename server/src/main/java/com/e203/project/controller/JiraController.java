@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.e203.project.dto.request.JiraIssueRequestDto;
+import com.e203.project.dto.request.JiraSprintCreateRequestDto;
 import com.e203.project.dto.response.JiraIssueResponseDto;
 import com.e203.project.dto.request.ProjectJiraConnectDto;
 import com.e203.project.dto.response.ProjectJiraEpicResponseDto;
@@ -85,12 +86,22 @@ public class JiraController {
 		return ResponseEntity.status(NOT_FOUND).body("이슈 수정에 실패했습니다.");
 	}
 
-	@GetMapping("/api/v1/project/{projectId}/sprint")
+	@GetMapping("/api/v1/projects/{projectId}/sprint")
 	public ResponseEntity<List<SprintResponseDto>> findAllSprints(@PathVariable("projectId") int projectId) {
 		List<SprintResponseDto> sprints = jiraService.findAllSprints(projectId);
 		if(sprints==null){
 			ResponseEntity.status(NOT_FOUND).body(null);
 		}
 		return ResponseEntity.status(OK).body(sprints);
+	}
+
+	@PostMapping("/api/v1/projects/{projectId}/sprint")
+	public ResponseEntity<String> createSprint(@PathVariable("projectId") int projectId, @RequestBody JiraSprintCreateRequestDto dto){
+		String sprint = jiraService.createSprint(dto, projectId);
+
+		if(sprint.equals("Not Found")){
+			return ResponseEntity.status(NOT_FOUND).body("스프린트 생성을 실패했습니다.");
+		}
+		return ResponseEntity.status(OK).body(sprint);
 	}
 }

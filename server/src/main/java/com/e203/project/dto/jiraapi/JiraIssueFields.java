@@ -20,7 +20,7 @@ public class JiraIssueFields {
 		this.fields= fields;
 	}
 
-	public static JiraIssueFields transferJsonObject(JiraIssueRequestDto dto, String jiraProjectId) {
+	public static JiraIssueFields transferJsonObject(JiraIssueRequestDto dto, String jiraProjectId, String jiraAccountId) {
 		Map<String, String> content = new HashMap<String, String>();
 		content.put("text", dto.getDescription());
 		content.put("type", "text");
@@ -43,9 +43,12 @@ public class JiraIssueFields {
 		jiraIssueRequest.setIssueType(new HashMap<>() {{
 			put("name", dto.getIssueType());
 		}});
-		jiraIssueRequest.setAssignee(new HashMap<>() {{
-			put("name", dto.getAssignee());
-		}});
+		if(!jiraAccountId.isEmpty()){
+			jiraIssueRequest.setAssignee(new HashMap<>() {{
+				put("id",jiraAccountId);
+			}});
+		}
+
 
 		return JiraIssueFields.builder()
 			.fields(jiraIssueRequest)

@@ -1,5 +1,6 @@
 package com.e203.project.service;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 
 import com.e203.project.dto.request.JiraIssueRequestDto;
+import com.e203.project.dto.request.JiraSprintCreateRequestDto;
 import com.e203.project.dto.response.JiraIssueResponseDto;
 import com.e203.project.dto.request.ProjectJiraConnectDto;
 import com.e203.project.dto.response.ProjectJiraEpicResponseDto;
@@ -93,5 +95,26 @@ public class JiraServiceTest {
 	public void findSprint(){
 		List<SprintResponseDto> allSprints = jiraService.findAllSprints(1);
 		allSprints.stream().forEach(sprintResponseDto -> System.out.println(sprintResponseDto.getName()));
+	}
+
+	@Test
+	@DisplayName("Jira accountId 조회")
+	public void findAccountId(){
+		String jiraAccountId = jiraService.findJiraAccountId("dongji_11@naver.com",
+			"***REMOVED***");
+		System.out.println(jiraAccountId);
+	}
+
+	@Test
+	@DisplayName("Jira Sprint 생성")
+	public void createSprint(){
+		JiraSprintCreateRequestDto createRequestDto = JiraSprintCreateRequestDto.builder()
+			.name("스프린트 테스트")
+			.goal("목표")
+			.startDate("2024-11-12T09:00:00.000Z")
+			.endDate("2024-11-19T09:00:00.000Z")
+			.build();
+		String sprint = jiraService.createSprint(createRequestDto, 1);
+		System.out.println(sprint);
 	}
 }

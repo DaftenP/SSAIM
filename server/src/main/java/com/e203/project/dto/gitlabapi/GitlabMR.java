@@ -1,7 +1,5 @@
 package com.e203.project.dto.gitlabapi;
 
-import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -9,11 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 @Getter
 @Setter
-@ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class GitlabMR {
 	private int id;
